@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Chat</h1>
+        <p>Welcome, {{ username }}! <a href="/logout" class="btn">Logout</a></p>
+        <ul id="messages" class="chat-box"></ul>
+        <div class="input-box">
+            <input id="input" autocomplete="off" class="message-input" />
+            <button onclick="sendMessage()" class="btn send-button">Send</button>
+        </div>
+        <div id="users" class="online-users">Online Users:</div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script src="script.js"></script>
+    <!-- <h1>Chat</h1>
+    <p>Welcome, {{ username }}! <a href="/logout">Logout</a></p>
+    <ul id="messages"></ul>
+    <input id="input" autocomplete="off" /><button onclick="sendMessage()">Send</button>
+    <div id="users">Online Users:</div> -->
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script> -->
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('message', function(msg) {
+            var ul = document.getElementById('messages');
+            var li = document.createElement('li');
+            li.appendChild(document.createTextNode(msg));
+            ul.appendChild(li);
+        });
+
+        socket.on('update_users', function(users) {
+            var usersDiv = document.getElementById('users');
+            usersDiv.innerHTML = 'Online Users:<br>';
+            users.forEach(function(user) {
+                usersDiv.innerHTML += user + '<br>';
+            });
+        });
+
+        function sendMessage() {
+            var input = document.getElementById('input');
+            var message = input.value;
+            socket.emit('message', message);
+            input.value = '';
+        }
+
+        var inputField = document.getElementById('input');
+        inputField.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
